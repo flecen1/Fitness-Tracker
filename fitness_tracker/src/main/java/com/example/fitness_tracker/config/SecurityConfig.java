@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/users/email/*/exists").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/error/**").permitAll()
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/login").permitAll()
