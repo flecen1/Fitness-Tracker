@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background-color: #4d84e2;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .nav a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        
+        .main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .welcome-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature h2 {
+            color: #4d84e2;
+            margin-top: 0;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #4d84e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+        
+        .button:hover {
+            background-color: #3a70c8;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Fitness Tracker</div>
+        <nav class="nav">
+            <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/workouts}">Мои тренировки</a>
+                <a th:href="@{/goals}">Мои цели</a>
+                <a th:href="@{/stats}">Статистика</a>
+                <a th:href="@{/logout}">Выйти</a>
+            </div>
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/login}">Войти</a>
+                <a th:href="@{/register}">Регистрация</a>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="main">
+        <div class="welcome-box">
+            <h1>Добро пожаловать в Fitness Tracker</h1>
+            <p>Ваш персональный помощник для отслеживания тренировок и достижения целей</p>
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/register}" class="button">Начать сейчас</a>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <a th:href="@{/workouts/new}" class="button">Добавить тренировку</a>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h2>Отслеживание тренировок</h2>
+                <p>Записывайте свои тренировки, отслеживайте прогресс и анализируйте результаты.</p>
+            </div>
+            
+            <div class="feature">
+                <h2>Установка целей</h2>
+                <p>Ставьте цели по тренировкам, весу и другим показателям, и отслеживайте их достижение.</p>
+            </div>
+            
+            <div class="feature">
+                <h2>Статистика и аналитика</h2>
+                <p>Получайте наглядную статистику и аналитику своих тренировок и прогресса.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 

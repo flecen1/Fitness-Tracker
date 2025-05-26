@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Код верификации</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .container {
+            width: 600px;
+            margin: 0 auto;
+            border: 5px solid #ff003c;
+            border-collapse: collapse;
+            background-color: #000000;
+        }
+        
+        .header {
+            padding: 30px 15px;
+            background-color: #000000;
+            border-bottom: 5px solid #ff003c;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 60px;
+            color: #ff003c;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+            line-height: 1.1;
+            margin: 0;
+        }
+        
+        .content {
+            padding: 40px 30px;
+            background-color: #000000;
+        }
+        
+        .error-display {
+            font-size: 30px;
+            color: #ff003c;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: bold;
+            line-height: 1.2;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .divider {
+            background-color: #ff003c;
+            height: 2px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .alert {
+            border: 2px dashed #ff003c;
+            padding: 20px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+        
+        .alert p {
+            font-size: 16px;
+            color: #ff003c;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .code-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .code {
+            display: inline-block;
+            padding: 25px;
+            border: 3px solid #ff003c;
+            background-color: #000000;
+        }
+        
+        .code p {
+            font-size: 72px;
+            letter-spacing: 12px;
+            color: #ff003c;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .message {
+            font-size: 18px;
+            color: #ffffff;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .warning {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #ff003c;
+            margin: 25px 0;
+            background-color: #000000;
+        }
+        
+        .warning p {
+            font-size: 26px;
+            color: #ff003c;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+        
+        .footer {
+            padding: 25px 0;
+            background-color: #000000;
+            text-align: center;
+        }
+        
+        .footer h2 {
+            font-size: 22px;
+            color: #ff003c;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            margin-top: 0;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #999999;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <table class="container" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td>
+                <!-- Верхняя полоса с "битыми пикселями" -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td width="15%" height="15" style="background-color: #ff003c;"></td>
+                        <td width="5%" height="15" style="background-color: #000000;"></td>
+                        <td width="60%" height="15" style="background-color: #ff003c;"></td>
+                        <td width="7%" height="15" style="background-color: #000000;"></td>
+                        <td width="13%" height="15" style="background-color: #ff003c;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Заголовок -->
+        <tr>
+            <td class="header">
+                <h1>Fitness Tracker</h1>
+            </td>
+        </tr>
+        
+        <!-- Основное содержимое -->
+        <tr>
+            <td class="content">
+                <!-- 404 Error Display -->
+                <div class="error-display">
+                    Подтверждение регистрации
+                    <div class="divider"></div>
+                </div>
+                
+                <!-- Оповещение -->
+                <div class="alert">
+                    <p>
+                        [ ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ ДОСТУПА ]<br>
+                        [ РЕГИСТРАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ ]
+                    </p>
+                </div>
+                
+                <div class="message">
+                    Вы получили этот код для завершения регистрации в приложении Fitness Tracker.
+                </div>
+                
+                <!-- Код верификации -->
+                <div class="code-container">
+                    <div class="code">
+                        <p th:text="${code}">123456</p>
+                    </div>
+                </div>
+                
+                <!-- Предупреждение -->
+                <div class="warning">
+                    <p>Код действителен 30 минут</p>
+                </div>
+                
+                <div class="message">
+                    Если вы не запрашивали этот код, проигнорируйте это сообщение.
+                </div>
+            </td>
+        </tr>
+        
+        <!-- Нижняя полоса с "битыми пикселями" -->
+        <tr>
+            <td>
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td width="30%" height="5" style="background-color: #ff003c;"></td>
+                        <td width="15%" height="5" style="background-color: #000000;"></td>
+                        <td width="55%" height="5" style="background-color: #ff003c;"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Футер -->
+        <tr>
+            <td class="footer">
+                <h2>Fitness Tracker</h2>
+                <p>&copy; 2024. Все права защищены.</p>
+                <p>Автоматическое сообщение. Не отвечайте на него.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html> 

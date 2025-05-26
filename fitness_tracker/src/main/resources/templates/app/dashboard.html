@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления - Fitness Tracker</title>
+    <style>
+        :root {
+            --primary-color: #4d84e2;
+            --primary-dark: #3a70c8;
+            --secondary-color: #6c757d;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .user-dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .user-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--dark-color);
+        }
+        
+        .user-dropdown-content a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-dropdown.show .user-dropdown-content {
+            display: block;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--dark-color);
+        }
+        
+        .card-body {
+            color: var(--secondary-color);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+        
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-inner {
+            height: 100%;
+            background-color: var(--primary-color);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Fitness Tracker</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="/app/dashboard" class="active">Панель управления</a></li>
+                <li><a href="/app/workouts">Мои тренировки</a></li>
+                <li><a href="/app/goals">Мои цели</a></li>
+                <li><a href="/app/stats">Статистика</a></li>
+                <li><a href="/app/profile">Профиль</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Панель управления</h1>
+                <div class="user-dropdown" id="userDropdown">
+                    <button class="user-dropdown-btn" id="userDropdownBtn">
+                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                    </button>
+                    <div class="user-dropdown-content">
+                        <a href="/app/profile">Профиль</a>
+                        <a href="#" id="logoutBtn">Выйти</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Общая статистика</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Тренировок</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">3</div>
+                                    <div class="stat-label">Цели</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">8.5</div>
+                                    <div class="stat-label">Часов</div>
+                                </div>
+                            </div>
+                            <a href="/app/stats" class="btn btn-outline">Подробнее</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Последние тренировки</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="margin-bottom: 0.5rem;">Бег - 5.2 км</div>
+                                <div style="font-size: 0.875rem; color: #6c757d;">Вчера, 18:30</div>
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <div style="margin-bottom: 0.5rem;">Силовая - 45 мин</div>
+                                <div style="font-size: 0.875rem; color: #6c757d;">2 дня назад, 20:00</div>
+                            </div>
+                            <a href="/app/workouts" class="btn btn-outline">Все тренировки</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Прогресс по целям</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>Бег 50 км в месяц</span>
+                                    <span>68%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-inner" style="width: 68%;"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>10 силовых тренировок</span>
+                                    <span>40%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-inner" style="width: 40%;"></div>
+                                </div>
+                            </div>
+                            <a href="/app/goals" class="btn btn-outline">Все цели</a>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Быстрые действия</h3>
+                        </div>
+                        <div class="card-body">
+                            <a href="/app/workouts/new" class="btn" style="display: block; margin-bottom: 0.75rem; text-align: center;">Добавить тренировку</a>
+                            <a href="/app/goals/new" class="btn" style="display: block; text-align: center;">Добавить цель</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Настраиваем выпадающее меню пользователя
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userDropdownBtn.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Закрываем меню при клике вне его
+            window.addEventListener('click', function(e) {
+                if (!userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Обработка выхода из системы
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Перенаправляем на стандартный URL выхода Spring Security
+                window.location.href = '/logout';
+            });
+        });
+    </script>
+</body>
+</html> 
