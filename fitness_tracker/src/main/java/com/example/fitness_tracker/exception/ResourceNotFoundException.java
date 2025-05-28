@@ -1,16 +1,37 @@
 package com.example.fitness_tracker.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import jakarta.persistence.EntityNotFoundException;
 
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class ResourceNotFoundException extends RuntimeException {
+/**
+ * Исключение, которое выбрасывается, когда запрашиваемый ресурс не найден.
+ * Расширяет EntityNotFoundException для автоматической обработки в GlobalExceptionHandler.
+ */
+public class ResourceNotFoundException extends EntityNotFoundException {
+    
+    private String resourceName;
+    private String fieldName;
+    private Object fieldValue;
+    
+    public ResourceNotFoundException(String resourceName, String fieldName, Object fieldValue) {
+        super(String.format("%s не найден с %s : '%s'", resourceName, fieldName, fieldValue));
+        this.resourceName = resourceName;
+        this.fieldName = fieldName;
+        this.fieldValue = fieldValue;
+    }
     
     public ResourceNotFoundException(String message) {
         super(message);
     }
     
-    public ResourceNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    public String getResourceName() {
+        return resourceName;
+    }
+    
+    public String getFieldName() {
+        return fieldName;
+    }
+    
+    public Object getFieldValue() {
+        return fieldValue;
     }
 } 

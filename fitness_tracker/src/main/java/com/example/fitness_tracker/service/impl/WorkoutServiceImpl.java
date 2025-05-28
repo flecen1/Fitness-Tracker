@@ -65,7 +65,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     public Workout updateWorkout(Long id, Workout workoutDetails) {
         Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout", "id", id));
 
         workout.setName(workoutDetails.getName());
         workout.setType(workoutDetails.getType());
@@ -80,7 +80,7 @@ public class WorkoutServiceImpl implements WorkoutService {
     @Override
     public void deleteWorkout(Long id) {
         Workout workout = workoutRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout", "id", id));
         
         workoutRepository.delete(workout);
     }

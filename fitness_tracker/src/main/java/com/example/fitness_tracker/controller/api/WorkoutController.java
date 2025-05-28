@@ -88,7 +88,7 @@ public class WorkoutController {
     @GetMapping("/{id}")
     public ResponseEntity<WorkoutResponse> getWorkoutById(@PathVariable Long id) {
         Workout workout = workoutService.getWorkoutById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout", "id", id));
 
         return ResponseEntity.ok(convertToWorkoutResponse(workout));
     }
@@ -99,7 +99,7 @@ public class WorkoutController {
             @AuthenticationPrincipal UserDetails userDetails) {
         
         User user = userService.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", userDetails.getUsername()));
 
         Workout workout = Workout.builder()
                 .name(workoutRequest.getName())
@@ -124,7 +124,7 @@ public class WorkoutController {
         
         // Check if workout exists
         Workout existingWorkout = workoutService.getWorkoutById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout", "id", id));
         
         // Check if user owns this workout
         String username = userDetails.getUsername();
@@ -151,7 +151,7 @@ public class WorkoutController {
             @AuthenticationPrincipal UserDetails userDetails) {
         
         Workout workout = workoutService.getWorkoutById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Workout", "id", id));
         
         // Check if user owns this workout
         String username = userDetails.getUsername();
