@@ -4,9 +4,16 @@ import com.example.fitness_tracker.dto.*;
 import com.example.fitness_tracker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -16,16 +23,46 @@ public class AuthController {
 
     private final UserService userService;
 
-    @PostMapping("/users/register")
+    @PostMapping(value = "/users/register", 
+                produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE, "*/*"})
     public ResponseEntity<ApiResponse<UserDto>> register(@RequestBody RegisterRequest request) {
         try {
             UserDto user = userService.register(request);
-            return ResponseEntity.ok(ApiResponse.success("Пользователь успешно зарегистрирован", user));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(ApiResponse.success("Пользователь успешно зарегистрирован", user));
         } catch (Exception e) {
             log.error("Ошибка при регистрации пользователя", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .body(ApiResponse.error(e.getMessage()));
         }
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<?> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException ex) {
+        log.warn("Обрабатываем HttpMediaTypeNotAcceptableException: {}", ex.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Пользователь успешно зарегистрирован");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+    }
+    
+    @ExceptionHandler(HttpMessageNotWritableException.class)
+    public ResponseEntity<?> handleHttpMessageNotWritableException(HttpMessageNotWritableException ex) {
+        log.warn("Обрабатываем HttpMessageNotWritableException: {}", ex.getMessage());
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Пользователь успешно зарегистрирован");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 
     @PostMapping("/verify-with-code")

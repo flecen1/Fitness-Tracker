@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/resend-verification").permitAll()
                 .requestMatchers("/api/users/*/exists").permitAll()
                 .requestMatchers("/api/users/email/*/exists").permitAll()
+                .requestMatchers("/api/workouts/**").authenticated()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/error/**").permitAll()

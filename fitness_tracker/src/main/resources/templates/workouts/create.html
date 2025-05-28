@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить тренировку | Фитнес-трекер</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4d84e2;
+            --primary-dark: #3a70c8;
+            --secondary-color: #6c757d;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--dark-color);
+        }
+        
+        .user-dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .user-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--dark-color);
+        }
+        
+        .user-dropdown-content a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-dropdown.show .user-dropdown-content {
+            display: block;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            color: var(--dark-color);
+            margin-bottom: 6px;
+            display: block;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.8125rem;
+            margin-top: 6px;
+            display: block;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px 12px;
+            width: 100%;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(77, 132, 226, 0.25);
+        }
+        
+        .btn {
+            border-radius: 4px;
+            font-weight: normal;
+            padding: 8px 16px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-outline-secondary {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            background-color: transparent;
+            text-decoration: none;
+        }
+        
+        .section-header {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+        }
+        
+        .back-btn i {
+            margin-right: 5px;
+        }
+        
+        .required-label {
+            color: var(--danger-color);
+            margin-left: 2px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .form-actions button {
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-actions i {
+            margin-right: 5px;
+        }
+        
+        /* Стили для разметки с колонками */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+        
+        .col-md-6 {
+            position: relative;
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .col-md-6 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Fitness Tracker</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="/app/dashboard">Панель управления</a></li>
+                <li><a href="/app/workouts" class="active">Мои тренировки</a></li>
+                <li><a href="/app/goals">Мои цели</a></li>
+                <li><a href="/app/stats">Статистика</a></li>
+                <li><a href="/app/profile">Профиль</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Добавить тренировку</h1>
+                <div class="user-dropdown" id="userDropdown">
+                    <button class="user-dropdown-btn" id="userDropdownBtn">
+                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                    </button>
+                    <div class="user-dropdown-content">
+                        <a href="/app/profile">Профиль</a>
+                        <a href="#" id="logoutBtn">Выйти</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section-header">
+                    <a href="/app/workouts" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Назад
+                    </a>
+                    <h2>Новая тренировка</h2>
+                </div>
+
+                <div class="form-container">
+                    <form th:action="@{/app/workouts/create}" th:object="${workoutRequest}" method="post">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Название тренировки <span class="required-label">*</span></label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" 
+                                placeholder="Например: Утренняя пробежка, Йога, Силовая тренировка" required>
+                            <div class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="type" class="form-label">Тип тренировки <span class="required-label">*</span></label>
+                            <select class="form-select" id="type" th:field="*{type}" required>
+                                <option value="">Выберите тип тренировки</option>
+                                <option th:each="type : ${types}" th:value="${type}" th:text="${type}"></option>
+                            </select>
+                            <div class="error-message" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="duration" class="form-label">Длительность (минуты) <span class="required-label">*</span></label>
+                                    <input type="number" class="form-control" id="duration" th:field="*{duration}" 
+                                        min="1" placeholder="45" required>
+                                    <div class="error-message" th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="caloriesBurned" class="form-label">Сожжено калорий <span class="required-label">*</span></label>
+                                    <input type="number" class="form-control" id="caloriesBurned" th:field="*{caloriesBurned}" 
+                                        min="0" placeholder="300" required>
+                                    <div class="error-message" th:if="${#fields.hasErrors('caloriesBurned')}" th:errors="*{caloriesBurned}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="completedAt" class="form-label">Дата выполнения</label>
+                            <input type="datetime-local" class="form-control" id="completedAt" th:field="*{completedAt}">
+                            <div class="error-message" th:if="${#fields.hasErrors('completedAt')}" th:errors="*{completedAt}"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="form-label">Описание</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="4"
+                                    placeholder="Подробности тренировки, заметки, самочувствие..."></textarea>
+                            <div class="error-message" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="/app/workouts" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Сохранить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Настраиваем выпадающее меню пользователя
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userDropdownBtn.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Закрываем меню при клике вне его
+            window.addEventListener('click', function(e) {
+                if (!userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Обработка выхода из системы
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Перенаправляем на стандартный URL выхода Spring Security
+                window.location.href = '/logout';
+            });
+        });
+    </script>
+</body>
+</html> 

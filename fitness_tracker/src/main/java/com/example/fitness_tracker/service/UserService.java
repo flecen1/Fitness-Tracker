@@ -38,6 +38,10 @@ public class UserService {
     @Autowired(required = false)
     private AuthenticationManager authenticationManager;
 
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     @Transactional
     public UserDto register(RegisterRequest request) {
         // Проверяем существование пользователя
