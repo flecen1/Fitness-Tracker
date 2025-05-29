@@ -32,11 +32,6 @@ public class WebController {
         return "app/dashboard";
     }
 
-    @GetMapping("/app/goals")
-    public String goals() {
-        return "app/goals";
-    }
-
     @GetMapping("/app/stats")
     public String stats() {
         return "app/stats";
