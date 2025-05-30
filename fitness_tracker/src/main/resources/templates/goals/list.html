@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4d84e2;
-            --primary-dark: #3a70c8;
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
             --secondary-color: #6c757d;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
@@ -311,18 +311,7 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Fitness Tracker</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/dashboard">Панель управления</a></li>
-                <li><a href="/app/workouts">Мои тренировки</a></li>
-                <li><a href="/app/goals" class="active">Мои цели</a></li>
-                <li><a href="/app/stats">Статистика</a></li>
-                <li><a href="/app/profile">Профиль</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments/sidebar :: sidebar('goals')}"></div>
         
         <div class="main-content">
             <div class="top-bar">

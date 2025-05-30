@@ -118,6 +118,7 @@ public class GoalWebController {
     public String showCreateForm(Model model) {
         model.addAttribute("goalRequest", new GoalRequest());
         model.addAttribute("types", GOAL_TYPES);
+        model.addAttribute("activePage", "goals");
         
         return "goals/create";
     }

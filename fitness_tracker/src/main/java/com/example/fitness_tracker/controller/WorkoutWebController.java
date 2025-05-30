@@ -46,6 +46,7 @@ public class WorkoutWebController {
     public String createWorkoutForm(Model model) {
         model.addAttribute("workoutRequest", new WorkoutRequest());
         model.addAttribute("types", List.of("Кардио", "Силовая", "Йога", "Пилатес", "Растяжка", "Другое"));
+        model.addAttribute("activePage", "workouts");
         return "workouts/create";
     }
 

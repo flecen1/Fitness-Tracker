@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика тренировок | Фитнес-трекер</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        .user-dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .user-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .user-dropdown-content a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-dropdown.show .user-dropdown-content {
+            display: block;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .stats-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .stats-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .table-stats {
+            width: 100%;
+        }
+        
+        .table-stats th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .workout-type-card {
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .workout-type-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .workout-type-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stat-box {
+            background-color: var(--background-color);
+            border-radius: 4px;
+            padding: 8px 12px;
+            flex-grow: 1;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/sidebar :: sidebar('stats')}"></div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Статистика тренировок</h1>
+                <div class="user-dropdown" id="userDropdown">
+                    <button class="user-dropdown-btn" id="userDropdownBtn">
+                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                    </button>
+                    <div class="user-dropdown-content">
+                        <a href="/app/profile">Профиль</a>
+                        <a href="#" id="logoutBtn">Выйти</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section-header">
+                    <h2>Статистика тренировок</h2>
+                    <a href="/app/stats" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Назад к статистике
+                    </a>
+                </div>
+                
+                <div th:if="${workoutStats.empty}" class="alert alert-info">
+                    У вас пока нет тренировок для отображения статистики.
+                </div>
+                
+                <div th:unless="${workoutStats.empty}">
+                    <!-- Графики -->
+                    <div class="stats-card">
+                        <h3>Распределение тренировок по типам</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="workoutTypesPieChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="workoutCaloriesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Детальная статистика по каждому типу тренировок -->
+                    <div class="stats-card">
+                        <h3>Детальная статистика по типам тренировок</h3>
+                        <div th:each="stat : ${workoutStats}" class="workout-type-card">
+                            <div class="workout-type-name" th:text="${stat.type}">Бег</div>
+                            <div class="workout-type-stats">
+                                <div class="stat-box">
+                                    <div class="stat-value" th:text="${stat.count}">10</div>
+                                    <div class="stat-label">Количество</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" th:text="${stat.totalDuration}">600</div>
+                                    <div class="stat-label">Всего минут</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" th:text="${stat.totalCaloriesBurned}">5000</div>
+                                    <div class="stat-label">Всего калорий</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" th:text="${#numbers.formatDecimal(stat.avgDuration, 1, 1)}">60.0</div>
+                                    <div class="stat-label">Среднее время (мин)</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-value" th:text="${#numbers.formatDecimal(stat.avgCaloriesBurned, 1, 1)}">500.0</div>
+                                    <div class="stat-label">Средние калории</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Сравнительная таблица -->
+                    <div class="stats-card">
+                        <h3>Сравнительная таблица</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-stats">
+                                <thead>
+                                    <tr>
+                                        <th>Тип тренировки</th>
+                                        <th>Количество</th>
+                                        <th>Общая длительность</th>
+                                        <th>Всего калорий</th>
+                                        <th>Средняя длительность</th>
+                                        <th>Средние калории</th>
+                                        <th>Эффективность (ккал/мин)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="stat : ${workoutStats}">
+                                        <td th:text="${stat.type}">Бег</td>
+                                        <td th:text="${stat.count}">10</td>
+                                        <td th:text="${stat.totalDuration} + ' мин'">600 мин</td>
+                                        <td th:text="${stat.totalCaloriesBurned} + ' ккал'">5000 ккал</td>
+                                        <td th:text="${#numbers.formatDecimal(stat.avgDuration, 1, 1)} + ' мин'">60.0 мин</td>
+                                        <td th:text="${#numbers.formatDecimal(stat.avgCaloriesBurned, 1, 1)} + ' ккал'">500.0 ккал</td>
+                                        <td th:text="${#numbers.formatDecimal(stat.avgCaloriesBurned / stat.avgDuration, 1, 2)} + ' ккал/мин'">8.33 ккал/мин</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        // Данные для графиков
+        const workoutStatsData = /*[[${workoutStats}]]*/ [];
+        if (workoutStatsData && workoutStatsData.length > 0) {
+            const workoutTypes = workoutStatsData.map(stat => stat.type);
+            const workoutCounts = workoutStatsData.map(stat => stat.count);
+            const workoutCalories = workoutStatsData.map(stat => stat.totalCaloriesBurned);
+            
+            // Генерируем цвета для графиков
+            const generateColors = (count) => {
+                const baseColors = [
+                    'rgba(76, 175, 80, 0.7)', // зеленый
+                    'rgba(33, 150, 243, 0.7)', // синий
+                    'rgba(255, 152, 0, 0.7)', // оранжевый
+                    'rgba(156, 39, 176, 0.7)', // фиолетовый
+                    'rgba(244, 67, 54, 0.7)', // красный
+                    'rgba(0, 188, 212, 0.7)'  // голубой
+                ];
+                
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    colors.push(baseColors[i % baseColors.length]);
+                }
+                
+                return colors;
+            };
+            
+            const colors = generateColors(workoutTypes.length);
+            
+            // График типов тренировок (круговая диаграмма)
+            const workoutTypesPieCtx = document.getElementById('workoutTypesPieChart').getContext('2d');
+            new Chart(workoutTypesPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: workoutTypes,
+                    datasets: [{
+                        data: workoutCounts,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Количество тренировок по типам',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+            
+            // График калорий по типам тренировок
+            const workoutCaloriesCtx = document.getElementById('workoutCaloriesChart').getContext('2d');
+            new Chart(workoutCaloriesCtx, {
+                type: 'bar',
+                data: {
+                    labels: workoutTypes,
+                    datasets: [{
+                        label: 'Сожжено калорий',
+                        data: workoutCalories,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Калории, сожженные по типам тренировок',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Калории (ккал)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Настраиваем выпадающее меню пользователя
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userDropdownBtn.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Закрываем меню при клике вне его
+            window.addEventListener('click', function(e) {
+                if (!userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Обработка выхода из системы
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Перенаправляем на стандартный URL выхода Spring Security
+                window.location.href = '/logout';
+            });
+        });
+    </script>
+</body>
+</html> 

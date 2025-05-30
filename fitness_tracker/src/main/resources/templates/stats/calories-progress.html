@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогресс по калориям | Фитнес-трекер</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #45a049;
+            --background-color: #f8f9fa;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-dropdown-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        .user-dropdown-content {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .user-dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .user-dropdown-content a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-dropdown.show .user-dropdown-content {
+            display: block;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        
+        .stats-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .stats-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        
+        .filter-form {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .summary-box {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .summary-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div th:replace="~{fragments/sidebar :: sidebar('stats')}"></div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <h1>Прогресс по калориям</h1>
+                <div class="user-dropdown" id="userDropdown">
+                    <button class="user-dropdown-btn" id="userDropdownBtn">
+                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                    </button>
+                    <div class="user-dropdown-content">
+                        <a href="/app/profile">Профиль</a>
+                        <a href="#" id="logoutBtn">Выйти</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <div class="section-header">
+                    <h2>Прогресс по калориям</h2>
+                    <a href="/app/stats" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Назад к статистике
+                    </a>
+                </div>
+                
+                <!-- Форма фильтрации -->
+                <div class="filter-form">
+                    <form id="filterForm" action="/app/stats/calories-progress" method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="startDate" class="form-label">Начальная дата</label>
+                            <input type="date" class="form-control" id="startDate" name="startDate" th:value="${startDate}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="endDate" class="form-label">Конечная дата</label>
+                            <input type="date" class="form-control" id="endDate" name="endDate" th:value="${endDate}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="period" class="form-label">Период группировки</label>
+                            <select class="form-control" id="period" name="period">
+                                <option value="day" th:selected="${period == 'day'}">День</option>
+                                <option value="week" th:selected="${period == 'week'}">Неделя</option>
+                                <option value="month" th:selected="${period == 'month'}">Месяц</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter"></i> Применить фильтры
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Сводка статистики -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="summary-box">
+                            <div class="summary-value" th:text="${not caloriesProgress.empty} ? ${#aggregates.sum(caloriesProgress.![caloriesBurned])} + ' ккал' : '0 ккал'">1200 ккал</div>
+                            <div class="summary-label">Всего калорий за период</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-box">
+                            <div class="summary-value" th:text="${not caloriesProgress.empty} ? ${#aggregates.sum(caloriesProgress.![caloriesBurned]) / caloriesProgress.size()} + ' ккал' : '0 ккал'">120 ккал</div>
+                            <div class="summary-label">В среднем за период</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-box" style="background: linear-gradient(135deg, #FF5722, #FF9800);">
+                            <div class="summary-value">
+                                <i class="fas fa-fire"></i>
+                                <span th:text="${not caloriesProgress.empty and caloriesProgress.size() > 0 ? caloriesProgress.size() : 0} + ' дн.'">30 дн.</span>
+                            </div>
+                            <div class="summary-label">Дней активности</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- График прогресса по калориям -->
+                <div class="stats-card">
+                    <h3>График прогресса</h3>
+                    <div th:if="${caloriesProgress.empty}" class="alert alert-info">
+                        Нет данных для отображения с выбранными фильтрами.
+                    </div>
+                    <div th:unless="${caloriesProgress.empty}">
+                        <div class="chart-container">
+                            <canvas id="caloriesProgressChart"></canvas>
+                        </div>
+                        
+                        <!-- Таблица с данными -->
+                        <div class="table-responsive mt-4">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Период</th>
+                                        <th>Калории</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="progress : ${caloriesProgress}" th:if="${progress.caloriesBurned > 0}">
+                                        <td th:switch="${period}">
+                                            <span th:case="'day'" th:text="${#temporals.format(progress.date, 'dd.MM.yyyy')}">01.01.2023</span>
+                                            <span th:case="'week'" th:text="'Неделя ' + ${#temporals.format(progress.date, 'w, yyyy')}">Неделя 1, 2023</span>
+                                            <span th:case="'month'" th:text="${#temporals.format(progress.date, 'MMMM yyyy')}">Январь 2023</span>
+                                        </td>
+                                        <td th:text="${progress.caloriesBurned} + ' ккал'">100 ккал</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        // Данные для графика прогресса по калориям
+        const caloriesProgressData = /*[[${caloriesProgress}]]*/ [];
+        if (caloriesProgressData && caloriesProgressData.length > 0) {
+            const period = /*[[${period}]]*/ 'day';
+            
+            const dates = caloriesProgressData.map(progress => {
+                const date = new Date(progress.date);
+                let displayDate;
+                
+                switch(period) {
+                    case 'day':
+                        displayDate = date.toLocaleDateString('ru-RU');
+                        break;
+                    case 'week':
+                        // Получаем номер недели в году
+                        const weekNumber = Math.ceil((date - new Date(date.getFullYear(), 0, 1)) / 604800000);
+                        displayDate = `Неделя ${weekNumber}, ${date.getFullYear()}`;
+                        break;
+                    case 'month':
+                        displayDate = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(date);
+                        break;
+                    default:
+                        displayDate = date.toLocaleDateString('ru-RU');
+                }
+                
+                return displayDate;
+            });
+            
+            const calories = caloriesProgressData.map(progress => progress.caloriesBurned);
+            
+            // График прогресса по калориям
+            const caloriesProgressCtx = document.getElementById('caloriesProgressChart').getContext('2d');
+            new Chart(caloriesProgressCtx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Сожжено калорий',
+                        data: calories,
+                        backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                        borderColor: 'rgba(255, 87, 34, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 87, 34, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Калории (ккал)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItem) {
+                                    return tooltipItem[0].label;
+                                },
+                                label: function(context) {
+                                    return `Калории: ${context.parsed.y} ккал`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Настраиваем выпадающее меню пользователя
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userDropdownBtn.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Закрываем меню при клике вне его
+            window.addEventListener('click', function(e) {
+                if (!userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Обработка выхода из системы
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Перенаправляем на стандартный URL выхода Spring Security
+                window.location.href = '/logout';
+            });
+        });
+    </script>
+</body>
+</html> 

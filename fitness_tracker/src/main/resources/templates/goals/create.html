@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создание цели | Фитнес-трекер</title>
+    <title>Создание цели | Fitness Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4d84e2;
-            --primary-dark: #3a70c8;
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
             --secondary-color: #6c757d;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
@@ -251,49 +251,63 @@
         }
         
         .goal-type-badge:hover {
-            background-color: #e9e9e9;
+            background-color: #e9ecef;
         }
         
-        .goal-type-badge.active {
+        .goal-type-badge.selected {
             background-color: var(--primary-color);
             color: white;
         }
         
-        .goal-input-group {
+        /* Стили для разметки с колонками */
+        .row {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
         }
         
-        .goal-input-group .form-control {
-            flex: 1;
+        .col-md-6 {
+            position: relative;
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
         }
         
-        .goal-unit-control {
-            width: 100px !important;
+        @media (min-width: 768px) {
+            .col-md-6 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .back-link:hover {
+            color: var(--dark-color);
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Fitness Tracker</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/dashboard">Панель управления</a></li>
-                <li><a href="/app/workouts">Мои тренировки</a></li>
-                <li><a href="/app/goals" class="active">Мои цели</a></li>
-                <li><a href="/app/stats">Статистика</a></li>
-                <li><a href="/app/profile">Профиль</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments/sidebar :: sidebar('goals')}"></div>
         
         <div class="main-content">
             <div class="top-bar">
                 <h1>Создание цели</h1>
                 <div class="user-dropdown" id="userDropdown">
                     <button class="user-dropdown-btn" id="userDropdownBtn">
-                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                        <span th:text="${#authentication.name}">Пользователь</span> ▼
                     </button>
                     <div class="user-dropdown-content">
                         <a href="/app/profile">Профиль</a>
@@ -303,14 +317,18 @@
             </div>
             
             <div class="content">
+                <a href="/app/goals" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Назад к списку целей
+                </a>
+                
                 <div class="form-container">
                     <h2 class="form-title">Создание новой цели</h2>
                     
                     <form th:action="@{/app/goals/create}" th:object="${goalRequest}" method="post">
                         <div class="form-group">
                             <label for="name" class="form-label">Название цели *</label>
-                            <input type="text" id="name" th:field="*{name}" class="form-control" required placeholder="Например: Сбросить 5 кг">
-                            <div th:if="${#fields.hasErrors('name')}" class="form-error" th:errors="*{name}"></div>
+                            <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="form-error"></span>
                         </div>
                         
                         <div class="form-group">
@@ -319,39 +337,54 @@
                                 <option value="">Выберите тип</option>
                                 <option th:each="type : ${types}" th:value="${type}" th:text="${type}"></option>
                             </select>
-                            <div th:if="${#fields.hasErrors('type')}" class="form-error" th:errors="*{type}"></div>
+                            <span th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="form-error"></span>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="targetValue" class="form-label">Целевое значение *</label>
+                                    <input type="number" id="targetValue" th:field="*{targetValue}" class="form-control" required>
+                                    <span th:if="${#fields.hasErrors('targetValue')}" th:errors="*{targetValue}" class="form-error"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="currentValue" class="form-label">Текущее значение</label>
+                                    <input type="number" id="currentValue" th:field="*{currentValue}" class="form-control">
+                                    <span th:if="${#fields.hasErrors('currentValue')}" th:errors="*{currentValue}" class="form-error"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="unit" class="form-label">Единица измерения</label>
+                                    <input type="text" id="unit" th:field="*{unit}" class="form-control" placeholder="кг, км, раз и т.д.">
+                                    <span th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}" class="form-error"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="targetDate" class="form-label">Дата достижения *</label>
+                                    <input type="date" id="targetDate" th:field="*{targetDate}" class="form-control" required>
+                                    <span th:if="${#fields.hasErrors('targetDate')}" th:errors="*{targetDate}" class="form-error"></span>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="form-group">
                             <label for="description" class="form-label">Описание</label>
-                            <textarea id="description" th:field="*{description}" class="form-control" placeholder="Подробное описание вашей цели..."></textarea>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="4"></textarea>
+                            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="form-error"></span>
                         </div>
                         
-                        <h3 class="form-subtitle">Значения и прогресс</h3>
-                        
-                        <div class="form-group">
-                            <label for="targetValue" class="form-label">Целевое значение</label>
-                            <div class="goal-input-group">
-                                <input type="number" id="targetValue" th:field="*{targetValue}" class="form-control" placeholder="Например: 5">
-                                <input type="text" id="unit" th:field="*{unit}" class="form-control goal-unit-control" placeholder="Ед. изм.">
-                            </div>
-                            <div th:if="${#fields.hasErrors('targetValue')}" class="form-error" th:errors="*{targetValue}"></div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="currentValue" class="form-label">Текущее значение</label>
-                            <input type="number" id="currentValue" th:field="*{currentValue}" class="form-control" placeholder="Например: 0">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="targetDate" class="form-label">Целевая дата *</label>
-                            <input type="date" id="targetDate" th:field="*{targetDate}" class="form-control" required>
-                            <div th:if="${#fields.hasErrors('targetDate')}" class="form-error" th:errors="*{targetDate}"></div>
-                        </div>
-                        
-                        <div class="form-group checkbox-group">
-                            <input type="checkbox" id="completed" th:field="*{completed}" class="checkbox-input form-control">
-                            <label for="completed" class="checkbox-label">Цель уже выполнена</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="completed" th:field="*{completed}" class="checkbox-input">
+                            <label for="completed" class="checkbox-label">Цель уже достигнута</label>
                         </div>
                         
                         <div class="btn-actions">

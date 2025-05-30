@@ -6,8 +6,8 @@
     <title>Панель управления - Fitness Tracker</title>
     <style>
         :root {
-            --primary-color: #4d84e2;
-            --primary-dark: #3a70c8;
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
             --secondary-color: #6c757d;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
@@ -230,22 +230,34 @@
             background-color: var(--primary-color);
             color: white;
         }
+
+        .no-items-message {
+            color: var(--secondary-color);
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .goal-details {
+            margin-bottom: 0.5rem;
+        }
+
+        .goal-name {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .goal-progress {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.25rem;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Fitness Tracker</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/dashboard" class="active">Панель управления</a></li>
-                <li><a href="/app/workouts">Мои тренировки</a></li>
-                <li><a href="/app/goals">Мои цели</a></li>
-                <li><a href="/app/stats">Статистика</a></li>
-                <li><a href="/app/profile">Профиль</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
         
         <div class="main-content">
             <div class="top-bar">
@@ -270,16 +282,16 @@
                         <div class="card-body">
                             <div class="stats">
                                 <div class="stat-item">
-                                    <div class="stat-value">12</div>
+                                    <div class="stat-value" th:text="${workoutsCount}">12</div>
                                     <div class="stat-label">Тренировок</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">3</div>
+                                    <div class="stat-value" th:text="${goalsCount}">3</div>
                                     <div class="stat-label">Цели</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-value">8.5</div>
-                                    <div class="stat-label">Часов</div>
+                                    <div class="stat-value" th:text="${totalHours}">8.5</div>
+                                    <div class="stat-label">Время</div>
                                 </div>
                             </div>
                             <a href="/app/stats" class="btn btn-outline">Подробнее</a>
@@ -291,15 +303,21 @@
                             <h3>Последние тренировки</h3>
                         </div>
                         <div class="card-body">
-                            <div style="margin-bottom: 1rem;">
-                                <div style="margin-bottom: 0.5rem;">Бег - 5.2 км</div>
-                                <div style="font-size: 0.875rem; color: #6c757d;">Вчера, 18:30</div>
+                            <div th:if="${recentWorkouts.isEmpty()}" class="no-items-message">
+                                <p>У вас пока нет тренировок</p>
                             </div>
-                            <div style="margin-bottom: 1rem;">
-                                <div style="margin-bottom: 0.5rem;">Силовая - 45 мин</div>
-                                <div style="font-size: 0.875rem; color: #6c757d;">2 дня назад, 20:00</div>
+                            <div th:each="workout : ${recentWorkouts}" style="margin-bottom: 1rem;">
+                                <div style="margin-bottom: 0.5rem;" th:text="${workout.name + ' - ' + workout.duration + ' мин'}">Бег - 5.2 км</div>
+                                <div style="font-size: 0.875rem; color: #6c757d;" 
+                                     th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(workout.completedAt, T(java.time.LocalDateTime).now())}">
+                                    <span th:if="${days == 0}">Сегодня, </span>
+                                    <span th:if="${days == 1}">Вчера, </span>
+                                    <span th:if="${days > 1}" th:text="${days + ' дня назад, '}">2 дня назад, </span>
+                                    <span th:text="${#temporals.format(workout.completedAt, 'HH:mm')}">18:30</span>
+                                </div>
                             </div>
-                            <a href="/app/workouts" class="btn btn-outline">Все тренировки</a>
+                            <a th:if="${!recentWorkouts.isEmpty()}" href="/app/workouts" class="btn btn-outline">Все тренировки</a>
+                            <a th:if="${recentWorkouts.isEmpty()}" href="/app/workouts/create" class="btn">Добавить тренировку</a>
                         </div>
                     </div>
                     
@@ -308,25 +326,36 @@
                             <h3>Прогресс по целям</h3>
                         </div>
                         <div class="card-body">
-                            <div class="progress-container">
-                                <div class="progress-label">
-                                    <span>Бег 50 км в месяц</span>
-                                    <span>68%</span>
+                            <div th:if="${activeGoals == null || activeGoals.isEmpty()}" class="no-items-message">
+                                <p>У вас нет активных целей</p>
+                                <a href="/app/goals/create" class="btn">Добавить цель</a>
+                            </div>
+                            <div th:if="${activeGoals != null && !activeGoals.isEmpty()}">
+                                <div th:each="goal : ${activeGoals}" class="progress-container" 
+                                     th:if="${goal.currentValue != null && goal.targetValue != null && goal.targetValue > 0}">
+                                    <div class="goal-details">
+                                        <div class="goal-name" th:text="${goal.name}">Бег 50 км в месяц</div>
+                                        <div class="goal-progress">
+                                            <span th:if="${goal.unit != null}" 
+                                                  th:text="${goal.currentValue + ' ' + goal.unit + ' из ' + goal.targetValue + ' ' + goal.unit}">
+                                                34 км из 50 км
+                                            </span>
+                                            <span th:unless="${goal.unit != null}" 
+                                                  th:text="${goal.currentValue + ' из ' + goal.targetValue}">
+                                                34 из 50
+                                            </span>
+                                            <span th:with="progress=${goal.currentValue * 100 / goal.targetValue}"
+                                                  th:text="${#numbers.formatDecimal(progress, 1, 0) + '%'}">68%</span>
+                                        </div>
                                 </div>
                                 <div class="progress-bar">
-                                    <div class="progress-bar-inner" style="width: 68%;"></div>
+                                        <div class="progress-bar-inner" 
+                                             th:with="progress=${goal.currentValue * 100 / goal.targetValue}"
+                                             th:style="'width: ' + ${progress <= 100 ? progress : 100} + '%'"></div>
+                                    </div>
                                 </div>
+                                <a href="/app/goals" class="btn btn-outline">Все цели</a>
                             </div>
-                            <div class="progress-container">
-                                <div class="progress-label">
-                                    <span>10 силовых тренировок</span>
-                                    <span>40%</span>
-                                </div>
-                                <div class="progress-bar">
-                                    <div class="progress-bar-inner" style="width: 40%;"></div>
-                                </div>
-                            </div>
-                            <a href="/app/goals" class="btn btn-outline">Все цели</a>
                         </div>
                     </div>
                     
@@ -335,8 +364,8 @@
                             <h3>Быстрые действия</h3>
                         </div>
                         <div class="card-body">
-                            <a href="/app/workouts/new" class="btn" style="display: block; margin-bottom: 0.75rem; text-align: center;">Добавить тренировку</a>
-                            <a href="/app/goals/new" class="btn" style="display: block; text-align: center;">Добавить цель</a>
+                            <a href="/app/workouts/create" class="btn" style="display: block; margin-bottom: 0.75rem; text-align: center;">Добавить тренировку</a>
+                            <a href="/app/goals/create" class="btn" style="display: block; text-align: center;">Добавить цель</a>
                         </div>
                     </div>
                 </div>

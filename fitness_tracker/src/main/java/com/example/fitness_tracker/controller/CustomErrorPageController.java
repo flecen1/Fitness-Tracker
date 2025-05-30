@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,16 @@ public class CustomErrorPageController implements ErrorController {
         // Получаем статус ошибки
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         int statusCode = status != null ? Integer.valueOf(status.toString()) : 500;
+        
+        // Проверяем, аутентифицирован ли пользователь
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() 
+                && !authentication.getName().equals("anonymousUser");
+        
+        // Для аутентифицированных пользователей перенаправляем на dashboard
+        if (isAuthenticated) {
+            return "redirect:/app/dashboard";
+        }
         
         // Для ошибок 404 - возвращаем страницу Not Found
         if (statusCode == HttpStatus.NOT_FOUND.value()) {

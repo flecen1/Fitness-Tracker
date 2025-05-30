@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Боковое меню -->
+    <div th:fragment="sidebar(activePage)" class="sidebar">
+        <div class="sidebar-header">
+            <h2>Fitness Tracker</h2>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a th:href="@{/app/dashboard}" th:classappend="${activePage == 'dashboard' ? 'active' : ''}">Панель управления</a></li>
+            <li><a th:href="@{/app/workouts}" th:classappend="${activePage == 'workouts' ? 'active' : ''}">Мои тренировки</a></li>
+            <li><a th:href="@{/app/goals}" th:classappend="${activePage == 'goals' ? 'active' : ''}">Мои цели</a></li>
+            <li><a th:href="@{/app/stats}" th:classappend="${activePage == 'stats' ? 'active' : ''}">Статистика</a></li>
+            <li><a th:href="@{/app/profile}" th:classappend="${activePage == 'profile' ? 'active' : ''}">Профиль</a></li>
+        </ul>
+    </div>
+</body>
+</html> 

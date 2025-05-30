@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить тренировку | Фитнес-трекер</title>
+    <title>Добавить тренировку | Fitness Tracker</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4d84e2;
-            --primary-dark: #3a70c8;
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
             --secondary-color: #6c757d;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
@@ -167,7 +167,7 @@
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(77, 132, 226, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
         }
         
         .btn {
@@ -252,29 +252,33 @@
                 max-width: 50%;
             }
         }
+        
+        /* Стили для инпута даты-времени */
+        .datetime-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .datetime-container > div {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .datetime-container > div:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Fitness Tracker</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/dashboard">Панель управления</a></li>
-                <li><a href="/app/workouts" class="active">Мои тренировки</a></li>
-                <li><a href="/app/goals">Мои цели</a></li>
-                <li><a href="/app/stats">Статистика</a></li>
-                <li><a href="/app/profile">Профиль</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments/sidebar :: sidebar('workouts')}"></div>
         
         <div class="main-content">
             <div class="top-bar">
                 <h1>Добавить тренировку</h1>
                 <div class="user-dropdown" id="userDropdown">
                     <button class="user-dropdown-btn" id="userDropdownBtn">
-                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
+                        <span th:text="${#authentication.name}">Пользователь</span> ▼
                     </button>
                     <div class="user-dropdown-content">
                         <a href="/app/profile">Профиль</a>
@@ -284,63 +288,65 @@
             </div>
             
             <div class="content">
-                <div class="section-header">
-                    <a href="/app/workouts" class="back-btn">
-                        <i class="fas fa-arrow-left"></i> Назад
-                    </a>
-                    <h2>Новая тренировка</h2>
-                </div>
-
                 <div class="form-container">
+                    <div class="section-header">
+                        <a href="/app/workouts" class="back-btn">
+                            <i class="fas fa-arrow-left"></i> Назад к тренировкам
+                        </a>
+                    </div>
+
                     <form th:action="@{/app/workouts/create}" th:object="${workoutRequest}" method="post">
                         <div class="form-group">
                             <label for="name" class="form-label">Название тренировки <span class="required-label">*</span></label>
-                            <input type="text" class="form-control" id="name" th:field="*{name}" 
-                                placeholder="Например: Утренняя пробежка, Йога, Силовая тренировка" required>
-                            <div class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                            <input type="text" id="name" th:field="*{name}" class="form-control" required>
+                            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error-message"></span>
                         </div>
-
-                        <div class="form-group">
-                            <label for="type" class="form-label">Тип тренировки <span class="required-label">*</span></label>
-                            <select class="form-select" id="type" th:field="*{type}" required>
-                                <option value="">Выберите тип тренировки</option>
-                                <option th:each="type : ${types}" th:value="${type}" th:text="${type}"></option>
-                            </select>
-                            <div class="error-message" th:if="${#fields.hasErrors('type')}" th:errors="*{type}"></div>
-                        </div>
-
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="duration" class="form-label">Длительность (минуты) <span class="required-label">*</span></label>
-                                    <input type="number" class="form-control" id="duration" th:field="*{duration}" 
-                                        min="1" placeholder="45" required>
-                                    <div class="error-message" th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}"></div>
+                                    <label for="type" class="form-label">Тип тренировки <span class="required-label">*</span></label>
+                                    <select id="type" th:field="*{type}" class="form-select" required>
+                                        <option value="">Выберите тип</option>
+                                        <option th:each="type : ${types}" th:value="${type}" th:text="${type}"></option>
+                                    </select>
+                                    <span th:if="${#fields.hasErrors('type')}" th:errors="*{type}" class="error-message"></span>
                                 </div>
                             </div>
+                            
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="caloriesBurned" class="form-label">Сожжено калорий <span class="required-label">*</span></label>
-                                    <input type="number" class="form-control" id="caloriesBurned" th:field="*{caloriesBurned}" 
-                                        min="0" placeholder="300" required>
-                                    <div class="error-message" th:if="${#fields.hasErrors('caloriesBurned')}" th:errors="*{caloriesBurned}"></div>
+                                    <label for="duration" class="form-label">Длительность (мин) <span class="required-label">*</span></label>
+                                    <input type="number" id="duration" th:field="*{duration}" class="form-control" required min="1">
+                                    <span th:if="${#fields.hasErrors('duration')}" th:errors="*{duration}" class="error-message"></span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="completedAt" class="form-label">Дата выполнения</label>
-                            <input type="datetime-local" class="form-control" id="completedAt" th:field="*{completedAt}">
-                            <div class="error-message" th:if="${#fields.hasErrors('completedAt')}" th:errors="*{completedAt}"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="caloriesBurned" class="form-label">Сожжено калорий</label>
+                                    <input type="number" id="caloriesBurned" th:field="*{caloriesBurned}" class="form-control" min="0">
+                                    <span th:if="${#fields.hasErrors('caloriesBurned')}" th:errors="*{caloriesBurned}" class="error-message"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="completedAt" class="form-label">Дата и время <span class="required-label">*</span></label>
+                                    <input type="datetime-local" id="completedAt" th:field="*{completedAt}" class="form-control" required>
+                                    <span th:if="${#fields.hasErrors('completedAt')}" th:errors="*{completedAt}" class="error-message"></span>
+                                </div>
+                            </div>
                         </div>
-
+                        
                         <div class="form-group">
                             <label for="description" class="form-label">Описание</label>
-                            <textarea class="form-control" id="description" th:field="*{description}" rows="4"
-                                    placeholder="Подробности тренировки, заметки, самочувствие..."></textarea>
-                            <div class="error-message" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="4"></textarea>
+                            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="error-message"></span>
                         </div>
-
+                        
                         <div class="form-actions">
                             <a href="/app/workouts" class="btn btn-outline-secondary">
                                 <i class="fas fa-times"></i> Отмена
