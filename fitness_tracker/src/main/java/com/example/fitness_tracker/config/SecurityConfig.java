@@ -75,16 +75,20 @@ public class SecurityConfig {
         };
     }
 
+    // Обработчик для входной точки аутентификации API
+    private AuthenticationEntryPoint apiAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            objectMapper.writeValue(response.getWriter(), 
+                ApiResponse.error("Требуется аутентификация для доступа к ресурсу."));
+        };
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // Создаем отдельный entry point для API запросов
         var loginEntryPoint = new LoginUrlAuthenticationEntryPoint("/login");
-        AuthenticationEntryPoint apiAuthenticationEntryPoint = (request, response, authException) -> {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            objectMapper.writeValue(response.getWriter(),
-                ApiResponse.error("Требуется аутентификация для доступа к ресурсу"));
-        };
 
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -109,12 +113,39 @@ public class SecurityConfig {
                 .requestMatchers("/app/**").authenticated()
                 .anyRequest().authenticated()
             )
-            .exceptionHandling(exception -> exception
-                .accessDeniedHandler(apiAccessDeniedHandler())
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                // Обработчик для доступа запрещен (403)
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    if (apiRequestMatcher().matches(request)) {
+                        // API запросы возвращают JSON
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        objectMapper.writeValue(response.getWriter(), 
+                            ApiResponse.error("Доступ запрещен. Недостаточно прав для выполнения операции."));
+                    } else {
+                        // Веб-запросы перенаправляются на стандартный обработчик ошибок
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+                    }
+                })
+                // Обработчик для не аутентифицирован (401)
                 .defaultAuthenticationEntryPointFor(
-                    apiAuthenticationEntryPoint,
-                    apiRequestMatcher() 
+                    apiAuthenticationEntryPoint(),
+                    apiRequestMatcher()
                 )
+                .authenticationEntryPoint((request, response, authException) -> {
+                    // Для обычных веб-запросов
+                    if (!apiRequestMatcher().matches(request)) {
+                        // Для неавторизованных пользователей определяем, существует ли путь
+                        String requestURI = request.getRequestURI();
+                        if (requestURI.startsWith("/app/")) {
+                            // Для защищенных ресурсов - код 401 (требуется авторизация)
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Требуется авторизация");
+                        } else {
+                            // Для несуществующих путей - код 404 (не найдено)
+                            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Страница не найдена");
+                        }
+                    }
+                })
             )
             .formLogin(form -> form
                 .loginPage("/login")

@@ -108,6 +108,10 @@
             Неверное имя пользователя или пароль
         </div>
         
+        <div th:if="${param.unauthorized}" class="alert" style="background-color: #f39c12;">
+            Для доступа к этой странице необходима авторизация
+        </div>
+        
         <div th:if="${param.logout}" class="alert" style="background-color: #2ecc71;">
             Вы успешно вышли из системы
         </div>

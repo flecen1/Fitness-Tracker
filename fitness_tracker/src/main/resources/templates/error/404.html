@@ -3,48 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Страница не найдена</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title th:text="${statusCode} + ' - Ошибка'">Ошибка</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff00ff;
+            --neon-yellow: #ffff00;
+            --neon-red: #ff0055;
+            --cyber-dark: #050505;
+            --cyber-light: rgba(0, 240, 255, 0.1);
+        }
+        
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cyber-dark);
+            color: #fff;
+            overflow: hidden;
         }
-        .error-container {
-            text-align: center;
-            padding: 100px 0;
-        }
-        .error-code {
-            font-size: 120px;
-            font-weight: bold;
-            color: #dc3545;
-            margin-bottom: 0;
-            line-height: 1;
-        }
-        .error-message {
-            font-size: 24px;
-            color: #495057;
-            margin-bottom: 30px;
-        }
-        .btn-home {
-            padding: 10px 30px;
+        
+        .app {
+            position: relative;
+            height: 100vh;
+            background: var(--cyber-dark);
+            overflow: hidden;
             font-size: 18px;
         }
-        .error-image {
-            max-width: 300px;
-            margin-bottom: 30px;
+        
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(var(--cyber-light) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--cyber-light) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+            z-index: 1;
+        }
+        
+        .img {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            animation: catAnim 1.5s ease forwards, catGlitch 2s ease-in-out infinite 1.5s;
+            text-align: center;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .img img {
+            display: block;
+            max-width: 95vw;
+            max-height: 90vh;
+            margin: 0 auto;
+            height: auto;
+            filter: brightness(1.2) contrast(1.2) saturate(1.5) hue-rotate(180deg) drop-shadow(0 0 15px var(--neon-blue));
+            mask-image: linear-gradient(to top, black 95%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, black 95%, transparent 100%);
+        }
+        
+        @keyframes catAnim {
+            0% {
+                translate: 0 100%;
+            }
+            100% {
+                translate: 0 0;
+            }
+        }
+        
+        @keyframes catGlitch {
+            0%, 100% {
+                transform: translateX(0);
+                filter: brightness(1.2) contrast(1.2) saturate(1.5) hue-rotate(180deg);
+            }
+            20% {
+                transform: translateX(-5px);
+                filter: brightness(1.3) contrast(1.3) saturate(1.6) hue-rotate(190deg);
+            }
+            40% {
+                transform: translateX(5px);
+                filter: brightness(1.1) contrast(1.1) saturate(1.4) hue-rotate(170deg);
+            }
+            60% {
+                transform: translateX(-3px);
+                filter: brightness(1.2) contrast(1.2) saturate(1.5) hue-rotate(180deg);
+            }
+            80% {
+                transform: translateX(3px);
+                filter: brightness(1.2) contrast(1.2) saturate(1.5) hue-rotate(180deg);
+            }
+        }
+        
+        .okak {
+            position: absolute;
+            bottom: 5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 900;
+            font-size: 6vw;
+            color: transparent;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            -webkit-text-stroke: 2px var(--neon-blue);
+            animation: errorGlitch 4s ease-in-out infinite;
+            z-index: 5;
+        }
+        
+        @keyframes errorGlitch {
+            0%, 100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+                -webkit-text-stroke: 2px var(--neon-blue);
+            }
+            10% {
+                opacity: 0.9;
+                transform: translate(-51%, -50%) scale(1.01);
+                -webkit-text-stroke: 2px var(--neon-pink);
+        }
+            20% {
+                opacity: 1;
+                transform: translate(-49%, -50%) scale(0.99);
+                -webkit-text-stroke: 2px var(--neon-yellow);
+            }
+            30% {
+                opacity: 0.9;
+                transform: translate(-50%, -50%) scale(1);
+                -webkit-text-stroke: 2px var(--neon-blue);
+            }
+        }
+        
+        .error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 40vw;
+            font-weight: 900;
+            transform: translate(-50%, 800px);
+            animation: errorAnim 1.5s ease forwards, errorGlitch 4s ease-in-out infinite 1.5s;
+            z-index: 2;
+            color: transparent;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            -webkit-text-stroke: 2px var(--neon-blue);
+            letter-spacing: -20px;
+        }
+        
+        @keyframes errorAnim {
+            100% {
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .error-message {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 24px;
+            font-weight: 400;
+            text-align: center;
+            z-index: 100;
+            width: 90%;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: messageGlitch 5s ease-in-out infinite;
+        }
+        
+        @keyframes messageGlitch {
+            0%, 100% {
+                opacity: 1;
+                transform: translateX(-50%) skewX(0);
+                text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-blue);
+            }
+            5%, 15% {
+                opacity: 0.9;
+                transform: translateX(-51%) skewX(2deg);
+                text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-pink);
+        }
+            10%, 20% {
+                opacity: 1;
+                transform: translateX(-49%) skewX(-2deg);
+                text-shadow: 0 0 5px #fff, 0 0 10px var(--neon-red);
+            }
+        }
+        
+        .btn-home {
+            position: absolute;
+            left: 50%;
+            bottom: 80px;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid var(--neon-blue);
+            border-radius: 0;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+        
+        .btn-home:hover {
+            background-color: var(--neon-blue);
+            color: var(--cyber-dark);
+            box-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+        }
+        
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.2) 2px,
+                rgba(0, 0, 0, 0.2) 4px
+            );
+            pointer-events: none;
+            opacity: 0.2;
+            z-index: 10;
+        }
+        
+        .scanner {
+            display: none;
+        }
+        
+        .data-corruption {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .data-corruption::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 85, 0.1), transparent);
+            animation: dataStream 8s linear infinite;
+        }
+        
+        @keyframes dataStream {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 200%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container error-container">
-        <img src="https://cdn-icons-png.flaticon.com/512/6195/6195678.png" alt="Error 404" class="error-image">
-        <h1 class="error-code">404</h1>
-        <p class="error-message" th:text="${errorMessage}">Страница не найдена</p>
-        <p class="mb-4">Возможно, страница была удалена или указан неверный URL-адрес.</p>
-        <a href="/app/dashboard" class="btn btn-primary btn-home">Вернуться к приложению</a>
+    <div class="app">
+        <div class="cyber-grid"></div>
+        <div class="error" th:text="${statusCode}">
+            404
+        </div>
+        <div class="error-message" th:if="${statusCode == 404}">
+            Страница не найдена
+        </div>
+        <div class="error-message" th:if="${statusCode == 403}">
+            Доступ запрещен. У вас недостаточно прав для просмотра этой страницы
+        </div>
+        <div class="error-message" th:if="${statusCode == 401}">
+            Для доступа к этой странице требуется авторизация
+        </div>
+        <div class="error-message" th:if="${statusCode == 500}">
+            Произошла внутренняя ошибка сервера
+        </div>
+        <div class="img">
+            <img src="https://i.ibb.co/BHYXWYnV/cat.png" alt="cat">
+            <h1 class="okak">ОКАК</h1>
+        </div>
+        <a th:if="${isAuthenticated}" href="/app/dashboard" class="btn-home">Вернуться обратно</a>
+        <a th:unless="${isAuthenticated}" href="/login" class="btn-home">Войти в систему</a>
+        <div class="glitch-overlay"></div>
+        <div class="scanner"></div>
+        <div class="data-corruption"></div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html> 

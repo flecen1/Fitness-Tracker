@@ -11,45 +11,54 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class CustomErrorPageController implements ErrorController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CustomErrorPageController.class);
 
     @RequestMapping("/error")
     public String handleError(HttpServletRequest request, HttpServletResponse response, Model model) {
         // Принудительно устанавливаем Content-Type
         response.setContentType(MediaType.TEXT_HTML_VALUE);
         
-        // Получаем статус ошибки
-        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        int statusCode = status != null ? Integer.valueOf(status.toString()) : 500;
+        // Получаем информацию об ошибке
+        Object statusObj = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        String path = (String) request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        String errorRequestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
         
-        // Проверяем, аутентифицирован ли пользователь
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() 
-                && !authentication.getName().equals("anonymousUser");
+        // Определяем код ошибки (по умолчанию 404 для неизвестных путей)
+        int statusCode = statusObj != null ? Integer.parseInt(statusObj.toString()) : 404;
         
-        // Для аутентифицированных пользователей перенаправляем на dashboard
-        if (isAuthenticated) {
-            return "redirect:/app/dashboard";
+        // Проверяем аутентификацию
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = (auth != null && auth.isAuthenticated() && 
+                                  !auth.getName().equals("anonymousUser"));
+        
+        // Проверяем, не происходит ли повторная обработка уже обрабатываемой ошибки
+        if (errorRequestUri != null && errorRequestUri.startsWith("/error")) {
+            logger.info("Предотвращено дублирование ошибки для пути: {}", path);
+            return null; // Прерываем обработку, чтобы избежать зацикливания
         }
         
-        // Для ошибок 404 - возвращаем страницу Not Found
-        if (statusCode == HttpStatus.NOT_FOUND.value()) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-            model.addAttribute("statusCode", 404);
-            model.addAttribute("errorMessage", "Страница не найдена");
-            return "error/404";
-        }
+        // Логируем информацию для отладки
+        logger.info("Ошибка: {} для пути: {}, пользователь аутентифицирован: {}", 
+                   statusCode, path, isAuthenticated);
         
-        // Исключаем коды перенаправлений
-        if (statusCode >= 300 && statusCode < 400) {
-            return null; // Позволяем продолжить обработку перенаправлений
-        }
+        // Важно: НЕ меняем код ошибки, а сохраняем исходный,
+        // который был определен системой Spring Security
+
+        // Устанавливаем соответствующий HTTP-статус
+        response.setStatus(statusCode);
         
-        // Для других ошибок показываем общую страницу ошибки
+        // Добавляем данные в модель для отображения на странице
         model.addAttribute("statusCode", statusCode);
-        model.addAttribute("errorMessage", "Произошла ошибка");
-        return "error/error";
+        model.addAttribute("path", path);
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        
+        // Всегда используем один шаблон
+        return "error/404";
     }
 } 

@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,9 +37,14 @@ public class GlobalExceptionHandler {
         response.setContentType(MediaType.TEXT_HTML_VALUE);
         response.setStatus(HttpStatus.NOT_FOUND.value());
 
+        // Проверяем аутентификацию пользователя
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = (auth != null && auth.isAuthenticated() && 
+                                  !auth.getName().equals("anonymousUser"));
+
         ModelAndView mav = new ModelAndView();
         mav.addObject("statusCode", 404);
-        mav.addObject("errorMessage", "Страница не найдена");
+        mav.addObject("isAuthenticated", isAuthenticated);
         mav.setViewName("error/404");
         return mav;
     }

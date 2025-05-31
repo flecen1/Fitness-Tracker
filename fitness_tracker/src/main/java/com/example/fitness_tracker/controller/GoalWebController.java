@@ -6,6 +6,7 @@ import com.example.fitness_tracker.model.Goal;
 import com.example.fitness_tracker.model.User;
 import com.example.fitness_tracker.service.GoalService;
 import com.example.fitness_tracker.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -91,15 +93,23 @@ public class GoalWebController {
     }
 
     @GetMapping("/{id}")
-    public String viewGoal(@PathVariable Long id, Model model) {
+    public String viewGoal(@PathVariable Long id, Model model, HttpServletResponse response) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal goal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!goal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         // Расчет процента выполнения, если есть целевое и текущее значение
@@ -161,15 +171,23 @@ public class GoalWebController {
     }
 
     @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model, HttpServletResponse response) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal goal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!goal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         GoalRequest goalRequest = GoalRequest.builder()
@@ -197,7 +215,8 @@ public class GoalWebController {
             @Valid @ModelAttribute("goalRequest") GoalRequest goalRequest,
             BindingResult result,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletResponse response) throws IOException {
         
         if (result.hasErrors()) {
             model.addAttribute("goalId", id);
@@ -208,11 +227,19 @@ public class GoalWebController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal existingGoal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!existingGoal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         // Обновляем детали цели, не меняя пользователя
@@ -244,16 +271,31 @@ public class GoalWebController {
     public String updateProgress(
             @PathVariable Long id,
             @RequestParam Integer currentValue,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletResponse response) throws IOException {
+        
+        // Проверяем, что значение не отрицательное
+        if (currentValue < 0) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Текущее значение не может быть отрицательным");
+            return "redirect:/app/goals/" + id;
+        }
         
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal existingGoal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!existingGoal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         // Обновляем прогресс
@@ -267,16 +309,25 @@ public class GoalWebController {
     @PostMapping("/{id}/complete")
     public String markAsCompleted(
             @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletResponse response) throws IOException {
         
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal existingGoal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!existingGoal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         // Отмечаем цель как выполненную
@@ -290,16 +341,25 @@ public class GoalWebController {
     @PostMapping("/{id}/delete")
     public String deleteGoal(
             @PathVariable Long id,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletResponse response) throws IOException {
         
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         
         Goal goal = goalService.getGoalById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));
+                .orElseThrow(() -> {
+                    try {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "Цель не найдена");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return new ResourceNotFoundException("Goal", "id", id);
+                });
         
         // Проверка доступа к цели
         if (!goal.getUser().getUsername().equals(auth.getName())) {
-            return "error/403";
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         goalService.deleteGoal(id);

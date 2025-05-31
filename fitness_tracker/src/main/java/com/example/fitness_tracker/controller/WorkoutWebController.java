@@ -5,7 +5,7 @@ import com.example.fitness_tracker.model.User;
 import com.example.fitness_tracker.model.Workout;
 import com.example.fitness_tracker.service.UserService;
 import com.example.fitness_tracker.service.WorkoutService;
-import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -84,15 +85,24 @@ public class WorkoutWebController {
     }
 
     @GetMapping("/{id}")
-    public String viewWorkout(@PathVariable Long id, Model model, Authentication authentication) {
+    public String viewWorkout(@PathVariable Long id, Model model, Authentication authentication, HttpServletResponse response) throws IOException {
         String username = authentication.getName();
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
         
         Optional<Workout> workoutOpt = workoutService.getWorkoutById(id);
         
-        if (workoutOpt.isEmpty() || !workoutOpt.get().getUser().getId().equals(user.getId())) {
-            return "redirect:/app/workouts";
+        if (workoutOpt.isEmpty()) {
+            // Если тренировка не найдена, возвращаем 404
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Тренировка не найдена");
+            return null;
+        }
+        
+        // Проверка доступа к тренировке
+        if (!workoutOpt.get().getUser().getId().equals(user.getId())) {
+            // Если тренировка принадлежит другому пользователю, возвращаем 403
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         model.addAttribute("workout", workoutOpt.get());
@@ -100,15 +110,24 @@ public class WorkoutWebController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editWorkoutForm(@PathVariable Long id, Model model, Authentication authentication) {
+    public String editWorkoutForm(@PathVariable Long id, Model model, Authentication authentication, HttpServletResponse response) throws IOException {
         String username = authentication.getName();
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
         
         Optional<Workout> workoutOpt = workoutService.getWorkoutById(id);
         
-        if (workoutOpt.isEmpty() || !workoutOpt.get().getUser().getId().equals(user.getId())) {
-            return "redirect:/app/workouts";
+        if (workoutOpt.isEmpty()) {
+            // Если тренировка не найдена, возвращаем 404
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Тренировка не найдена");
+            return null;
+        }
+        
+        // Проверка доступа к тренировке
+        if (!workoutOpt.get().getUser().getId().equals(user.getId())) {
+            // Если тренировка принадлежит другому пользователю, возвращаем 403
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         Workout workout = workoutOpt.get();
@@ -135,7 +154,8 @@ public class WorkoutWebController {
             BindingResult bindingResult,
             Authentication authentication,
             RedirectAttributes redirectAttributes,
-            Model model) {
+            Model model,
+            HttpServletResponse response) throws IOException {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("workoutId", id);
@@ -149,8 +169,15 @@ public class WorkoutWebController {
         
         Optional<Workout> workoutOpt = workoutService.getWorkoutById(id);
         
-        if (workoutOpt.isEmpty() || !workoutOpt.get().getUser().getId().equals(user.getId())) {
-            return "redirect:/app/workouts";
+        if (workoutOpt.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Тренировка не найдена");
+            return null;
+        }
+        
+        // Проверка доступа к тренировке
+        if (!workoutOpt.get().getUser().getId().equals(user.getId())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
         }
         
         Workout workout = workoutOpt.get();
@@ -170,7 +197,8 @@ public class WorkoutWebController {
     public String deleteWorkout(
             @PathVariable Long id,
             Authentication authentication,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletResponse response) throws IOException {
 
         String username = authentication.getName();
         User user = userService.findByUsername(username)
@@ -178,10 +206,19 @@ public class WorkoutWebController {
         
         Optional<Workout> workoutOpt = workoutService.getWorkoutById(id);
         
-        if (workoutOpt.isPresent() && workoutOpt.get().getUser().getId().equals(user.getId())) {
-            workoutService.deleteWorkout(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Тренировка успешно удалена!");
+        if (workoutOpt.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Тренировка не найдена");
+            return null;
         }
+        
+        // Проверка доступа к тренировке
+        if (!workoutOpt.get().getUser().getId().equals(user.getId())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Доступ запрещен");
+            return null;
+        }
+        
+        workoutService.deleteWorkout(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Тренировка успешно удалена!");
         
         return "redirect:/app/workouts";
     }

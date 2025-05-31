@@ -6,6 +6,9 @@ import com.example.fitness_tracker.model.Workout;
 import com.example.fitness_tracker.service.GoalService;
 import com.example.fitness_tracker.service.UserService;
 import com.example.fitness_tracker.service.WorkoutService;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -107,7 +110,9 @@ public class WebController {
     }
 
     @GetMapping("/app/profile")
-    public String profile() {
+    public String profile(Model model) {
+        // Получаем информацию о текущем пользователе и передаем ее в модель
+        // ...
         return "app/profile";
     }
 } 

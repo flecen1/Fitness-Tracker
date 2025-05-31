@@ -172,6 +172,11 @@ public class GoalController {
             @RequestParam Integer currentValue,
             @AuthenticationPrincipal UserDetails userDetails) {
         
+        // Проверяем, что значение не отрицательное
+        if (currentValue < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        
         // Проверяем, существует ли цель
         Goal existingGoal = goalService.getGoalById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Goal", "id", id));

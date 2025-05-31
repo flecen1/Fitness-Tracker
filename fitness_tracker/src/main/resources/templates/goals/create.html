@@ -344,7 +344,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="targetValue" class="form-label">Целевое значение *</label>
-                                    <input type="number" id="targetValue" th:field="*{targetValue}" class="form-control" required>
+                                    <input type="number" id="targetValue" th:field="*{targetValue}" class="form-control" required min="0">
                                     <span th:if="${#fields.hasErrors('targetValue')}" th:errors="*{targetValue}" class="form-error"></span>
                                 </div>
                             </div>
@@ -352,7 +352,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="currentValue" class="form-label">Текущее значение</label>
-                                    <input type="number" id="currentValue" th:field="*{currentValue}" class="form-control">
+                                    <input type="number" id="currentValue" th:field="*{currentValue}" class="form-control" min="0">
                                     <span th:if="${#fields.hasErrors('currentValue')}" th:errors="*{currentValue}" class="form-error"></span>
                                 </div>
                             </div>
