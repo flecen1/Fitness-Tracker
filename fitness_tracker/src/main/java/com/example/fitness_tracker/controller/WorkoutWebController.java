@@ -6,6 +6,7 @@ import com.example.fitness_tracker.model.Workout;
 import com.example.fitness_tracker.service.UserService;
 import com.example.fitness_tracker.service.WorkoutService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
