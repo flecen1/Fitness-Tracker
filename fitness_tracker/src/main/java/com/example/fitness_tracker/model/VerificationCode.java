@@ -32,6 +32,7 @@ public class VerificationCode {
     private LocalDateTime expiresAt;
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(expiresAt);
     }
 } 

@@ -43,49 +43,96 @@ public class AuthController {
     public ResponseEntity<?> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException ex) {
         log.warn("Обрабатываем HttpMediaTypeNotAcceptableException: {}", ex.getMessage());
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "Пользователь успешно зарегистрирован");
+        response.put("success", false);
+        response.put("message", "Ошибка формата данных");
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(HttpMessageNotWritableException.class)
     public ResponseEntity<?> handleHttpMessageNotWritableException(HttpMessageNotWritableException ex) {
         log.warn("Обрабатываем HttpMessageNotWritableException: {}", ex.getMessage());
         Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("message", "Пользователь успешно зарегистрирован");
+        response.put("success", false);
+        response.put("message", "Ошибка при обработке запроса");
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        return new ResponseEntity<>(response, headers, HttpStatus.OK);
+        return new ResponseEntity<>(response, headers, HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/verify-with-code")
-    public ResponseEntity<ApiResponse<UserDto>> verifyWithCode(@RequestBody VerificationRequest request) {
+    @PostMapping(value = "/verify-with-code", 
+               produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE, "*/*"})
+    public ResponseEntity<Object> verifyWithCode(@RequestBody VerificationRequest request) {
         try {
+            log.debug("Получен запрос на верификацию кода для пользователя: {}, код: {}", 
+                     request.getUsername(), request.getCode());
             UserDto user = userService.verifyWithCode(request);
-            return ResponseEntity.ok(ApiResponse.success("Аккаунт успешно подтвержден", user));
+            log.info("Верификация успешна для пользователя: {}", request.getUsername());
+            
+            // Создаем ответ в формате JSON
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Аккаунт успешно подтвержден");
+            response.put("data", user);
+            
+            // Устанавливаем правильные заголовки CORS и Content-Type
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Access-Control-Allow-Origin", "*");
+            
+            return new ResponseEntity<>(response, headers, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Ошибка при верификации кода", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
+            log.error("Ошибка при верификации кода для пользователя {}: {}", 
+                     request.getUsername(), e.getMessage());
+                     
+            // Создаем ответ об ошибке в формате JSON
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Access-Control-Allow-Origin", "*");
+            
+            return new ResponseEntity<>(errorResponse, headers, HttpStatus.BAD_REQUEST);
         }
     }
 
-    @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(@RequestBody ResendVerificationRequest request) {
+    @PostMapping(value = "/resend-verification",
+               produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE, "*/*"})
+    public ResponseEntity<Object> resendVerification(@RequestBody ResendVerificationRequest request) {
         try {
             userService.resendVerificationCode(request.getUsername(), request.getEmail());
-            return ResponseEntity.ok(ApiResponse.success("Код верификации отправлен на ваш email"));
+            
+            // Создаем ответ в формате JSON
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Код верификации отправлен на ваш email");
+            
+            // Устанавливаем правильные заголовки CORS и Content-Type
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Access-Control-Allow-Origin", "*");
+            
+            return new ResponseEntity<>(response, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Ошибка при повторной отправке кода верификации", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage()));
+            
+            // Создаем ответ об ошибке в формате JSON
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Access-Control-Allow-Origin", "*");
+            
+            return new ResponseEntity<>(errorResponse, headers, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -135,5 +182,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
         }
+    }
+    
+    /**
+     * Обработка OPTIONS-запросов для поддержки CORS
+     */
+    @RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
+    public ResponseEntity<Void> handleOptions() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Allow-Origin", "*");
+        headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Accept");
+        headers.add("Access-Control-Max-Age", "3600");
+        
+        return ResponseEntity.ok().headers(headers).build();
     }
 } 

@@ -131,13 +131,13 @@ public class GlobalExceptionHandler {
     
     // Ошибка 406 - Not Acceptable
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
-    @ResponseStatus(HttpStatus.OK) // Возвращаем 200 OK вместо 406 для этой ошибки
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ResponseEntity<ApiResponse<Void>> handleNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
         return ResponseEntity
-            .status(HttpStatus.OK)
+            .status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
-            .body(ApiResponse.success("Запрос обработан успешно"));
+            .body(ApiResponse.error("Ошибка в типе содержимого запроса"));
     }
     
     // Ошибка 409 - Conflict

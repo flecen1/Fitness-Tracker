@@ -78,23 +78,60 @@ public class UserService {
 
     @Transactional
     public UserDto verifyWithCode(VerificationRequest request) {
+        log.debug("Начало верификации кода для пользователя: {}", request.getUsername());
+        
+        if (request.getUsername() == null || request.getUsername().isEmpty()) {
+            log.error("Верификация отклонена: пустое имя пользователя");
+            throw new RuntimeException("Имя пользователя не может быть пустым");
+        }
+        
+        if (request.getCode() == null || request.getCode().isEmpty()) {
+            log.error("Верификация отклонена для {}: пустой код", request.getUsername());
+            throw new RuntimeException("Код подтверждения не может быть пустым");
+        }
+        
+        if (request.getCode().length() != 6) {
+            log.error("Верификация отклонена для {}: неверная длина кода ({} символов)", 
+                    request.getUsername(), request.getCode().length());
+            throw new RuntimeException("Код подтверждения должен состоять из 6 цифр");
+        }
+        
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> {
+                    log.error("Верификация отклонена: пользователь не найден: {}", request.getUsername());
+                    return new RuntimeException("Пользователь не найден");
+                });
+                
+        // Если пользователь уже верифицирован, сразу возвращаем успех
+        if (user.isVerified()) {
+            log.info("Пользователь {} уже верифицирован", user.getUsername());
+            return UserDto.fromUser(user);
+        }
 
         // Ищем последний код верификации
         VerificationCode verificationCode = codeRepository.findFirstByUserOrderByCreatedAtDesc(user)
-                .orElseThrow(() -> new RuntimeException("Код подтверждения не найден или истек"));
+                .orElseThrow(() -> {
+                    log.error("Верификация отклонена для {}: код не найден в БД", user.getUsername());
+                    return new RuntimeException("Код подтверждения не найден");
+                });
 
         // Проверяем код
         if (!request.getCode().equals(verificationCode.getCode())) {
+            log.error("Верификация отклонена для {}: неверный код. Ожидался {}, получен {}", 
+                    user.getUsername(), verificationCode.getCode(), request.getCode());
             throw new RuntimeException("Неверный код подтверждения");
         }
 
         // Проверяем срок действия
         if (verificationCode.isExpired()) {
-            throw new RuntimeException("Код подтверждения истек");
+            LocalDateTime now = LocalDateTime.now();
+            log.error("Верификация отклонена для {}: код истёк. Текущее время: {}, время истечения: {}", 
+                    user.getUsername(), now, verificationCode.getExpiresAt());
+            throw new RuntimeException("Код подтверждения истек. Пожалуйста, запросите новый код.");
         }
 
+        log.info("Код верификации корректен для {}, устанавливаем статус verified=true", user.getUsername());
+        
         // Верифицируем пользователя
         user.setVerified(true);
         user.setLastLogin(LocalDateTime.now());
@@ -102,6 +139,7 @@ public class UserService {
 
         // Удаляем использованный код
         codeRepository.delete(verificationCode);
+        log.info("Использованный код верификации удален для {}", user.getUsername());
 
         // Программно аутентифицируем пользователя
         try {
