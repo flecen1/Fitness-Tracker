@@ -59,6 +59,6 @@ public class CustomErrorPageController implements ErrorController {
         model.addAttribute("isAuthenticated", isAuthenticated);
         
         // Всегда используем один шаблон
-        return "error/404";
+        return "error/error";
     }
 } 

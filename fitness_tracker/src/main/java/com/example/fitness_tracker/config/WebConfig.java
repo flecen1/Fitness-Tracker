@@ -13,20 +13,25 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Конфигурационный класс для обработки статических ресурсов в приложении.
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Регистрация статических ресурсов
-        registry.addResourceHandler("/static/**")
-                .addResourceLocations("classpath:/static/");
-        
+        // Конфигурация для обработки CSS-файлов
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/");
                 
+        // Конфигурация для обработки JS-файлов
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/");
+                
+        // Конфигурация для обработки других статических ресурсов (изображения и т.д.)
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/");
     }
     
     @Override

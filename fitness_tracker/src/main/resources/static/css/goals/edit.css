@@ -1,0 +1,296 @@
+:root {
+    --primary-color: #4CAF50;
+    --primary-dark: #45a049;
+    --secondary-color: #6c757d;
+    --success-color: #2ecc71;
+    --danger-color: #FF6B6B;
+    --warning-color: #8BC34A;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --muscle-gain: #388E3C;
+    --weight-loss: #8BC34A;
+    --endurance: #2E7D32;
+    --water-intake: #66BB6A;
+    --strength: #1B5E20;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+body.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-dropdown-btn {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--dark-color);
+}
+
+.user-dropdown-content {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 4px;
+    display: none;
+}
+
+.user-dropdown-content a {
+    display: block;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: var(--dark-color);
+}
+
+.user-dropdown-content a:hover {
+    background-color: #f5f5f5;
+}
+
+.user-dropdown.show .user-dropdown-content {
+    display: block;
+}
+
+.content {
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-width: 800px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    animation: slideUp 0.6s ease-out;
+    border-top: 4px solid var(--primary-color);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.form-group:hover {
+    transform: translateX(3px);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.form-group:focus-within .form-label {
+    color: var(--primary-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-error {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 5px;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.btn {
+    padding: 12px 22px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--primary-color);
+    opacity: 0.8;
+    color: white;
+}
+
+.btn-secondary:hover {
+    opacity: 1;
+}
+
+.btn-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    animation: fadeIn 1s ease-out;
+}
+
+.form-title {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: var(--dark-color);
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.form-subtitle {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: var(--dark-color);
+    animation: slideInLeft 0.6s ease-out;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-group:hover {
+    transform: translateX(3px);
+}
+
+.checkbox-input {
+    width: auto;
+    cursor: pointer;
+}
+
+.checkbox-input:checked + .checkbox-label {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.checkbox-label {
+    font-weight: normal;
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.goal-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.goal-input-group .form-control {
+    flex: 1;
+}
+
+.goal-unit-control {
+    width: 100px !important;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    animation: slideInLeft 0.4s ease-out;
+}
+
+.back-link:hover {
+    transform: translateX(-3px);
+}
+
+.back-link i {
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover i {
+    transform: translateX(-3px);
+} 

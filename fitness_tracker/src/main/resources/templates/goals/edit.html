@@ -5,277 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование цели | Фитнес-трекер</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #4d84e2;
-            --primary-dark: #3a70c8;
-            --secondary-color: #6c757d;
-            --success-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --warning-color: #f39c12;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-        
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        .sidebar {
-            width: 250px;
-            background-color: var(--dark-color);
-            color: white;
-            padding: 1.5rem 0;
-        }
-        
-        .sidebar-header {
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        
-        .sidebar-nav {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .sidebar-nav a {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        
-        .sidebar-nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .sidebar-nav a.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .main-content {
-            flex: 1;
-        }
-        
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .user-dropdown {
-            position: relative;
-        }
-        
-        .user-dropdown-btn {
-            background: none;
-            border: none;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--dark-color);
-        }
-        
-        .user-dropdown-content {
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: white;
-            min-width: 180px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border-radius: 4px;
-            display: none;
-        }
-        
-        .user-dropdown-content a {
-            display: block;
-            padding: 0.75rem 1rem;
-            text-decoration: none;
-            color: var(--dark-color);
-        }
-        
-        .user-dropdown-content a:hover {
-            background-color: #f5f5f5;
-        }
-        
-        .user-dropdown.show .user-dropdown-content {
-            display: block;
-        }
-        
-        .content {
-            padding: 2rem;
-        }
-        
-        .form-container {
-            background-color: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        
-        .form-control:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-        
-        textarea.form-control {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .form-error {
-            color: var(--danger-color);
-            font-size: 0.875rem;
-            margin-top: 5px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: 500;
-            cursor: pointer;
-            border: none;
-            font-size: 1rem;
-            text-decoration: none;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-        
-        .btn-actions {
-            margin-top: 30px;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .form-title {
-            margin-top: 0;
-            margin-bottom: 25px;
-            color: var(--dark-color);
-        }
-        
-        .form-subtitle {
-            margin-top: 30px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-            color: var(--dark-color);
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .checkbox-input {
-            width: auto;
-        }
-        
-        .checkbox-label {
-            font-weight: normal;
-            margin-bottom: 0;
-        }
-        
-        .goal-input-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .goal-input-group .form-control {
-            flex: 1;
-        }
-        
-        .goal-unit-control {
-            width: 100px !important;
-        }
-        
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-        
-        .back-link i {
-            margin-right: 5px;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/fragments/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/goals/edit.css}">
 </head>
 <body>
     <div class="app-container">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Fitness Tracker</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/dashboard">Панель управления</a></li>
-                <li><a href="/app/workouts">Мои тренировки</a></li>
-                <li><a href="/app/goals" class="active">Мои цели</a></li>
-                <li><a href="/app/stats">Статистика</a></li>
-                <li><a href="/app/profile">Профиль</a></li>
-            </ul>
-        </div>
+        <div th:replace="~{fragments/sidebar :: sidebar('goals')}"></div>
         
         <div class="main-content">
             <div class="top-bar">
@@ -292,8 +27,8 @@
             </div>
             
             <div class="content">
-                <a th:href="@{/app/goals/{id}(id=${goalId})}" class="back-link">
-                    <i class="fas fa-arrow-left"></i> Назад к цели
+                <a th:href="@{/app/goals}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Назад к списку целей
                 </a>
                 
                 <div class="form-container">
@@ -348,7 +83,7 @@
                         </div>
                         
                         <div class="btn-actions">
-                            <a th:href="@{/app/goals/{id}(id=${goalId})}" class="btn btn-secondary">Отмена</a>
+                            <a th:href="@{/app/goals}" class="btn btn-secondary">Отмена</a>
                             <button type="submit" class="btn btn-primary">Сохранить изменения</button>
                         </div>
                     </form>
@@ -357,41 +92,7 @@
         </div>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Настраиваем выпадающее меню пользователя
-            const userDropdownBtn = document.getElementById('userDropdownBtn');
-            const userDropdown = document.getElementById('userDropdown');
-            
-            userDropdownBtn.addEventListener('click', function() {
-                userDropdown.classList.toggle('show');
-            });
-            
-            // Закрываем меню при клике вне его
-            window.addEventListener('click', function(e) {
-                if (!userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                }
-            });
-            
-            // Обработка выхода из системы
-            document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Перенаправляем на стандартный URL выхода Spring Security
-                window.location.href = '/logout';
-            });
-            
-            // Если цель отмечена как выполненная, показываем дату выполнения
-            const completedCheckbox = document.getElementById('completed');
-            completedCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    // Логика для отображения даты выполнения, если нужно
-                } else {
-                    // Логика для скрытия даты выполнения, если нужно
-                }
-            });
-        });
-    </script>
+    <script th:src="@{/js/fragments/sidebar.js}"></script>
+    <script th:src="@{/js/goals/edit.js}"></script>
 </body>
 </html> 

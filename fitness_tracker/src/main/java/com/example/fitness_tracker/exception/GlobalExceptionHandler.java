@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         ModelAndView mav = new ModelAndView();
         mav.addObject("statusCode", 404);
         mav.addObject("isAuthenticated", isAuthenticated);
-        mav.setViewName("error/404");
+        mav.setViewName("error/error");
         return mav;
     }
     

@@ -2,20 +2,89 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/fragments/sidebar.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Боковое меню -->
     <div th:fragment="sidebar(activePage)" class="sidebar">
+        
         <div class="sidebar-header">
+            <div class="logo-container">
+                <i class="fas fa-leaf logo-icon"></i>
             <h2>Fitness Tracker</h2>
+            </div>
+            <!-- Мини-логотип для свернутого состояния с классом clickable -->
+            <div class="mini-logo clickable" title="Развернуть меню">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <button class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-        <ul class="sidebar-nav">
-            <li><a th:href="@{/app/dashboard}" th:classappend="${activePage == 'dashboard' ? 'active' : ''}">Панель управления</a></li>
-            <li><a th:href="@{/app/workouts}" th:classappend="${activePage == 'workouts' ? 'active' : ''}">Мои тренировки</a></li>
-            <li><a th:href="@{/app/goals}" th:classappend="${activePage == 'goals' ? 'active' : ''}">Мои цели</a></li>
-            <li><a th:href="@{/app/stats}" th:classappend="${activePage == 'stats' ? 'active' : ''}">Статистика</a></li>
-            <li><a th:href="@{/app/profile}" th:classappend="${activePage == 'profile' ? 'active' : ''}">Профиль</a></li>
+        
+        <div class="sidebar-content">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <h3 th:text="${#authentication.name}">Пользователь</h3>
+                    <span class="user-plan">Премиум план</span>
+                </div>
+            </div>
+            
+            <div class="sidebar-divider"></div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a th:href="@{/app/dashboard}" th:classappend="${activePage == 'dashboard' ? 'active' : ''}">
+                            <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span>
+                            <span class="nav-text">Панель управления</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/app/workouts}" th:classappend="${activePage == 'workouts' ? 'active' : ''}">
+                            <span class="nav-icon"><i class="fas fa-dumbbell"></i></span>
+                            <span class="nav-text">Мои тренировки</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/app/goals}" th:classappend="${activePage == 'goals' ? 'active' : ''}">
+                            <span class="nav-icon"><i class="fas fa-bullseye"></i></span>
+                            <span class="nav-text">Мои цели</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/app/stats}" th:classappend="${activePage == 'stats' ? 'active' : ''}">
+                            <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="nav-text">Статистика</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/app/profile}" th:classappend="${activePage == 'profile' ? 'active' : ''}">
+                            <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+                            <span class="nav-text">Профиль</span>
+                        </a>
+                    </li>
         </ul>
+            </nav>
+            
+            <div class="sidebar-divider"></div>
+            
+            <div class="sidebar-footer">
+                <a th:href="@{/logout}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Выход</span>
+                </a>
+                <div class="app-version">Версия 1.0.0</div>
+            </div>
+        </div>
     </div>
+    
+    <script th:src="@{/js/fragments/sidebar.js}"></script>
 </body>
 </html> 

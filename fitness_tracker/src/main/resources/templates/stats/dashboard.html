@@ -6,6 +6,7 @@
     <title>Статистика | Фитнес-трекер</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/fragments/sidebar.css}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -29,53 +30,14 @@
             min-height: 100vh;
         }
         
-        .sidebar {
-            width: 250px;
-            background-color: #343a40;
-            color: white;
-            padding: 1.5rem 0;
-        }
-        
-        .sidebar-header {
-            padding: 0 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        
-        .sidebar-nav {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .sidebar-nav a {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        
-        .sidebar-nav a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .sidebar-nav a.active {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
         .main-content {
             flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-collapsed-width);
         }
         
         .top-bar {
@@ -212,20 +174,12 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Подключаем фрагмент боковой панели -->
         <div th:replace="~{fragments/sidebar :: sidebar('stats')}"></div>
         
         <div class="main-content">
             <div class="top-bar">
                 <h1>Статистика</h1>
-                <div class="user-dropdown" id="userDropdown">
-                    <button class="user-dropdown-btn" id="userDropdownBtn">
-                        <span id="username" th:text="${#authentication.name}">Пользователь</span> ▼
-                    </button>
-                    <div class="user-dropdown-content">
-                        <a href="/app/profile">Профиль</a>
-                        <a href="#" id="logoutBtn">Выйти</a>
-                    </div>
-                </div>
             </div>
             
             <div class="content">
@@ -309,142 +263,6 @@
         </div>
     </div>
     
-    <script th:inline="javascript">
-        // Данные для графика типов тренировок
-        const workoutStatsData = /*[[${workoutStats}]]*/ [];
-        if (workoutStatsData && workoutStatsData.length > 0) {
-            const workoutTypes = workoutStatsData.map(stat => stat.type);
-            const workoutCounts = workoutStatsData.map(stat => stat.count);
-            const workoutCalories = workoutStatsData.map(stat => stat.totalCaloriesBurned);
-            
-            // График типов тренировок
-            const workoutTypesCtx = document.getElementById('workoutTypesChart').getContext('2d');
-            new Chart(workoutTypesCtx, {
-                type: 'bar',
-                data: {
-                    labels: workoutTypes,
-                    datasets: [
-                        {
-                            label: 'Количество тренировок',
-                            data: workoutCounts,
-                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
-                            borderColor: 'rgba(76, 175, 80, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Сожжено калорий',
-                            data: workoutCalories,
-                            backgroundColor: 'rgba(255, 152, 0, 0.7)',
-                            borderColor: 'rgba(255, 152, 0, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Количество'
-                            }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Калории (ккал)'
-                            },
-                            grid: {
-                                drawOnChartArea: false,
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Данные для графика прогресса по калориям
-        const caloriesProgressData = /*[[${caloriesProgress}]]*/ [];
-        if (caloriesProgressData && caloriesProgressData.length > 0) {
-            const dates = caloriesProgressData.map(progress => {
-                const date = new Date(progress.date);
-                return date.toLocaleDateString('ru-RU');
-            });
-            const calories = caloriesProgressData.map(progress => progress.caloriesBurned);
-            
-            // График прогресса по калориям
-            const caloriesProgressCtx = document.getElementById('caloriesProgressChart').getContext('2d');
-            new Chart(caloriesProgressCtx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Сожжено калорий',
-                        data: calories,
-                        backgroundColor: 'rgba(255, 87, 34, 0.1)',
-                        borderColor: 'rgba(255, 87, 34, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(255, 87, 34, 1)',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Калории (ккал)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Настраиваем выпадающее меню пользователя
-            const userDropdownBtn = document.getElementById('userDropdownBtn');
-            const userDropdown = document.getElementById('userDropdown');
-            
-            userDropdownBtn.addEventListener('click', function() {
-                userDropdown.classList.toggle('show');
-            });
-            
-            // Закрываем меню при клике вне его
-            window.addEventListener('click', function(e) {
-                if (!userDropdown.contains(e.target)) {
-                    userDropdown.classList.remove('show');
-                }
-            });
-            
-            // Обработка выхода из системы
-            document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Перенаправляем на стандартный URL выхода Spring Security
-                window.location.href = '/logout';
-            });
-        });
-    </script>
+    <script th:src="@{/js/fragments/sidebar.js}"></script>
 </body>
 </html> 
